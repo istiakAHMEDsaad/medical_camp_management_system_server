@@ -40,8 +40,14 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
 async function run() {
   try {
+    const db = client.db('medical-camp');
+    const usersCollection = db.collection('users');
+
+
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
