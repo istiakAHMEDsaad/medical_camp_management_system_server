@@ -63,6 +63,7 @@ async function run() {
   try {
     const db = client.db('medical-camp');
     const usersCollection = db.collection('users');
+    const campsCollection = db.collection('camps');
 
     // Generate jwt token
     app.post('/jwt', async (req, res) => {
@@ -107,8 +108,28 @@ async function run() {
 
       const result = await usersCollection.insertOne({
         ...user,
+        role: 'organizer',
         timestamp: Date.now(),
       });
+      res.send(result);
+    });
+
+    //TODO (1)===============> save a camp data in database <===============
+    app.post('/camps', verifyToken, async (req, res) => {
+      const camp = req.body;
+      const result = await campsCollection.insertOne(camp);
+      res.send(result);
+    });
+    //TODO (2) ===============> get all camps data <===============
+    app.get('/camps', async (req, res) => {
+      const result = await campsCollection.find().toArray();
+      res.send(result);
+    });
+    // TODO (3) ===============> get cmaps data by id <===============
+    app.get('/camps/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await campsCollection.findOne(query);
       res.send(result);
     });
 
