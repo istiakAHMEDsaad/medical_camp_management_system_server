@@ -122,7 +122,16 @@ async function run() {
     });
     //TODO (2) ===============> get all camps data <===============
     app.get('/camps', async (req, res) => {
-      const result = await campsCollection.find().toArray();
+      const search = req.query.search;
+
+      let query = {
+        $or: [
+          { campName: { $regex: search || '', $options: 'i' } },
+          { location: { $regex: search || '', $options: 'i' } },
+        ],
+      };
+
+      const result = await campsCollection.find(query).toArray();
       res.send(result);
     });
     // TODO (3) ===============> get cmaps data by id <===============
@@ -132,6 +141,19 @@ async function run() {
       const result = await campsCollection.findOne(query);
       res.send(result);
     });
+    // TODO (4) ===============> sort category <===============
+    /* app.get('/camps', async (req, res) => {
+      const search = req.query.search;
+
+      let query = {
+        model: {
+          $regex: search || '',
+          $options: 'i',
+        },
+      };
+
+      const result
+    }); */
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
