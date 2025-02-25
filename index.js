@@ -120,9 +120,10 @@ async function run() {
       const result = await campsCollection.insertOne(camp);
       res.send(result);
     });
-    //TODO (2) ===============> get all camps data <===============
+    //TODO (2) ===============> get all camps data also search & sort data <===============
     app.get('/camps', async (req, res) => {
       const search = req.query.search;
+      const filter = req.query.filter;
 
       let query = {
         $or: [
@@ -131,7 +132,20 @@ async function run() {
         ],
       };
 
-      const result = await campsCollection.find(query).toArray();
+      let filterOption = {};
+      switch (filter) {
+        case 'lowest':
+          filterOption = { campFees: 1 };
+          break;
+        case 'highest':
+          filterOption = { campFees: -1 };
+          break;
+      }
+
+      const result = await campsCollection
+        .find(query)
+        .sort(filterOption)
+        .toArray();
       res.send(result);
     });
     // TODO (3) ===============> get cmaps data by id <===============
@@ -142,18 +156,6 @@ async function run() {
       res.send(result);
     });
     // TODO (4) ===============> sort category <===============
-    /* app.get('/camps', async (req, res) => {
-      const search = req.query.search;
-
-      let query = {
-        model: {
-          $regex: search || '',
-          $options: 'i',
-        },
-      };
-
-      const result
-    }); */
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
