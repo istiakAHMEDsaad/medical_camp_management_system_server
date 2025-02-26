@@ -115,6 +115,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/all-users', async (req, res) => {
+      try {
+        const users = await usersCollection.find({}).toArray(); // Get all users
+        res.json(users); 
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+      }
+    });
+
     // get participant data by email
     app.get('/participant/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -153,6 +163,21 @@ async function run() {
 
         const result = await campsCollection.updateOne(filter, updateDoc);
         res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: error.message });
+      }
+    });
+
+    app.delete('/delete-camp/:id', verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await campsCollection.deleteOne(query);
+        if (result.deletedCount === 1) {
+          res.send({ message: 'Camp deleted successfully' });
+        } else {
+          res.status(404).send({ message: 'Camp not found' });
+        }
       } catch (error) {
         res.status(500).send({ message: error.message });
       }
