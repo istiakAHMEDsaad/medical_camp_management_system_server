@@ -149,6 +149,19 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+    app.get('/famous-camp', async(req, res)=>{
+      const limit = parseInt(req.query.limit) || 6;
+
+      const sort = {
+        participant_count: -1
+      }
+      
+      const result = await campsCollection.find().sort(sort).limit(limit).toArray();
+
+      res.send(result)
+    })
+
     // TODO (3) ===============> get cmaps data by id <===============
     app.get('/camps/:id', async (req, res) => {
       const id = req.params.id;
