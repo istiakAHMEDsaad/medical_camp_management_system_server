@@ -64,6 +64,7 @@ async function run() {
     const db = client.db('medical-camp');
     const usersCollection = db.collection('users');
     const campsCollection = db.collection('camps');
+    const participantCollection = db.collection('participant');
 
     // Generate jwt token
     app.post('/jwt', async (req, res) => {
@@ -155,7 +156,31 @@ async function run() {
       const result = await campsCollection.findOne(query);
       res.send(result);
     });
-    // TODO (4) ===============> sort category <===============
+    // TODO (4) ===============> save regiser data in db <===============
+    app.post('/join-camp', verifyToken, async (req, res) => {
+      const participantInfo = req.body;
+      const { campId, participantEmail } = participantInfo;
+
+      // Check if the user has already joined the camp
+      const existingParticipant = await participantCollection.findOne({
+        campId,
+        participantEmail,
+      });
+      if (existingParticipant) {
+        return res
+          .status(400)
+          .send({ message: 'You have already joined this camp.' });
+      }
+
+      // Insert participant info into participantCollection
+      const result = await participantCollection.insertOne(participantInfo);
+
+      // Increment participant_count
+      const filter = { _id: new ObjectId(campId) };
+      const update = { $inc: { participant_count: 1 } };
+      await campsCollection.updateOne(filter, update);
+      res.send(result);
+    });
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
