@@ -133,6 +133,31 @@ async function run() {
       res.send(result);
     });
 
+    // patch data
+    app.patch('/camps-edit/:id', verifyToken, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updatedCamp = req.body;
+
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = {
+          $set: {
+            campName: updatedCamp.campName,
+            campFees: updatedCamp.campFees,
+            campDate: updatedCamp.campDate,
+            location: updatedCamp.location,
+            professional_name: updatedCamp.professional_name,
+            description: updatedCamp.description,
+          },
+        };
+
+        const result = await campsCollection.updateOne(filter, updateDoc);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: error.message });
+      }
+    });
+
     //TODO (1)===============> save a camp data in database <===============
     app.post('/camps', verifyToken, async (req, res) => {
       const camp = req.body;
