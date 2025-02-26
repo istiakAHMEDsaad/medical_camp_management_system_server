@@ -109,9 +109,27 @@ async function run() {
 
       const result = await usersCollection.insertOne({
         ...user,
-        role: 'organizer',
+        role: 'participant',
         timestamp: Date.now(),
       });
+      res.send(result);
+    });
+
+    // get participant data by email
+    app.get('/participant/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        participantEmail: email,
+      };
+      const result = await participantCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //get all posted camp data
+    app.get('/manage-camp/:email', verifyToken, async (req, res) => {
+      const authorEmail = req.params.email;
+      const query = { author_email: authorEmail };
+      const result = await campsCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -150,26 +168,30 @@ async function run() {
       res.send(result);
     });
 
-    app.get('/famous-camp', async(req, res)=>{
+    app.get('/famous-camp', async (req, res) => {
       const limit = parseInt(req.query.limit) || 6;
 
       const sort = {
-        participant_count: -1
-      }
-      
-      const result = await campsCollection.find().sort(sort).limit(limit).toArray();
+        participant_count: -1,
+      };
 
-      res.send(result)
-    })
+      const result = await campsCollection
+        .find()
+        .sort(sort)
+        .limit(limit)
+        .toArray();
 
-    // TODO (3) ===============> get cmaps data by id <===============
+      res.send(result);
+    });
+
+    // TODO (3) ===============> get cmaps data by single id <===============
     app.get('/camps/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await campsCollection.findOne(query);
       res.send(result);
     });
-    // TODO (4) ===============> save regiser data in db <===============
+    // TODO (4) ===============> save participant regiser data in db <===============
     app.post('/join-camp', verifyToken, async (req, res) => {
       const participantInfo = req.body;
       const { campId, participantEmail } = participantInfo;
