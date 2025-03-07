@@ -19,7 +19,11 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 //middleware
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://profound-tartufo-90a560.netlify.app',
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -40,7 +44,6 @@ const verifyToken = async (req, res, next) => {
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      console.log(err);
       return res.status(401).send({ message: 'unauthorized access' });
     }
     req.user = decoded;
@@ -61,6 +64,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    await client.connect();
     const db = client.db('medical-camp');
     const usersCollection = db.collection('users');
     const campsCollection = db.collection('camps');
@@ -118,7 +122,7 @@ async function run() {
     app.get('/all-users', async (req, res) => {
       try {
         const users = await usersCollection.find({}).toArray(); // Get all users
-        res.json(users); 
+        res.json(users);
       } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -267,16 +271,12 @@ async function run() {
       res.send(result);
     });
 
-    // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 });
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!'
-    );
+    //backed for payment method stripe code here
+
+    await client.db("admin").command({ ping: 1 });
+    console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
+    
   }
 }
 run().catch(console.dir);
