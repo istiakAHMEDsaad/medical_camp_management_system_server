@@ -129,6 +129,18 @@ async function run() {
       }
     });
 
+    app.get('/all-users/role/:email', async(req, res)=>{
+      const email = req.params.email;
+      const result = await usersCollection.findOne({email});
+      res.send({role: result?.role})
+    })
+
+    //get all participants data
+    app.get('/participant', verifyToken, async(req, res)=>{
+      const result = await participantCollection.find().toArray();
+      res.send(result);
+    })
+
     // get participant data by email
     app.get('/participant/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
